@@ -1,8 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  DateTime selectDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +34,9 @@ class HomeScreen extends StatelessWidget {
           width: MediaQuery.of(context).size.width,
           child: Column(
             children: [
-              _Top(),
+              _Top(selectedDate: selectDate,
+                  onPressed:onHartPressed
+              ),
               _Bottom(),
             ],
           ),
@@ -35,18 +44,51 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
+ void onHartPressed(){
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Align(
+          alignment: Alignment.center,
+          child: Container(
+            color: Colors.white,
+            height: 300.0,
+            child: CupertinoDatePicker(
+              // 날짜만 선택
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: selectDate,
+              // 오늘 이후로는 선택할 수 없음
+              maximumDate: DateTime.now(),
+              onDateTimeChanged: (DateTime date) {
+                setState(() {
+                  selectDate = date ;
+                });
+              },
+              // 년월일
+              dateOrder: DatePickerDateOrder.ymd,
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _Top extends StatefulWidget {
-  const _Top({super.key});
+  final DateTime selectedDate;
+  final VoidCallback? onPressed;
+  const _Top({
+    required this.selectedDate,
+    required this.onPressed,
+    super.key});
 
   @override
   State<_Top> createState() => _TopState();
 }
 
 class _TopState extends State<_Top> {
-  DateTime selectDate = DateTime.now();
-
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
@@ -66,41 +108,13 @@ class _TopState extends State<_Top> {
               style: textTheme.bodyLarge,
             ),
             Text(
-              '${selectDate.year}. ${selectDate.month}. ${selectDate.day}',
+              '${widget.selectedDate.year}. ${widget.selectedDate.month}. ${widget.selectedDate.day}',
               style: textTheme.bodyMedium,
             ),
             IconButton(
               iconSize: 60.0,
               color: Colors.red,
-              onPressed: () {
-                showCupertinoDialog(
-                  context: context,
-                  barrierDismissible: true,
-                  builder: (BuildContext context) {
-                    return Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        color: Colors.white,
-                        height: 300.0,
-                        child: CupertinoDatePicker(
-                          // 날짜만 선택
-                          mode: CupertinoDatePickerMode.date,
-                          initialDateTime: selectDate,
-                          // 오늘 이후로는 선택할 수 없음
-                          maximumDate: DateTime.now(),
-                          onDateTimeChanged: (DateTime date) {
-                            setState(() {
-                              selectDate = date ;
-                            });
-                          },
-                          // 년월일
-                          dateOrder: DatePickerDateOrder.ymd,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+              onPressed: widget.onPressed,
               icon: Icon(
                 Icons.favorite, // 하트모양 아이콘
               ),
@@ -108,7 +122,7 @@ class _TopState extends State<_Top> {
             Text(
               // 차이의 날짜의 일의 차이이
               // 오늘부터 1일
-              'D + ${now.difference(selectDate).inDays + 1}',
+              'D + ${now.difference(widget.selectedDate).inDays + 1}',
               style: textTheme.displayMedium,
             ),
           ],
@@ -130,3 +144,4 @@ class _Bottom extends StatelessWidget {
     );
   }
 }
+

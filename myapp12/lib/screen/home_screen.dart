@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:myapp12/component/number_to_image.dart';
 import 'package:myapp12/constant/color.dart';
 import 'package:myapp12/screen/setting_screen.dart';
 
@@ -11,7 +12,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<int> numbers = [123,456,789];
+  List<int> numbers = [123, 456, 789];
+  int maxNumber = 1000 ;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: onSettingIconPressed,
               ),
               // 숫자가 있는 곳
-              _Body(numbers: numbers,),
+              _Body(
+                numbers: numbers,
+              ),
               // 버튼이 있는 곳
               _Footer(
                 onPressed: generateRandomNumber,
@@ -38,37 +43,40 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  onSettingIconPressed(){
+
+  onSettingIconPressed() async {
     // builder 함수에서 제공하는  context 와 같다
     // context는 위젯 트리에 대한 정복를 가지고 있음)
+    // 넘어온 값을 받자
+    final result = await
     Navigator.of(context).push(
       MaterialPageRoute(
-          builder: (BuildContext context){
-            return SettingScreen();
-          },
+        builder: (BuildContext context) {
+          return SettingScreen(maxNumber: maxNumber);
+        },
       ),
     );
+    maxNumber = result ;
   }
-  generateRandomNumber(){
-      // 난수 생성
-      final rand = Random();
-      // 중복되는 값이 없음(set)
-      final Set<int> newNumbers = {};
-      while(newNumbers.length < 3){
-        final randomNumber = rand.nextInt(1000);
-        newNumbers.add(randomNumber);
-      }
-      setState(() {
-        numbers = newNumbers.toList();
-      });
-   }
+
+  generateRandomNumber() {
+    // 난수 생성
+    final rand = Random();
+    // 중복되는 값이 없음(set)
+    final Set<int> newNumbers = {};
+    while (newNumbers.length < 3) {
+      final randomNumber = rand.nextInt(maxNumber);
+      newNumbers.add(randomNumber);
+    }
+    setState(() {
+      numbers = newNumbers.toList();
+    });
+  }
 }
 
 class _Header extends StatelessWidget {
   final VoidCallback onPressed;
-  const _Header({
-    required this.onPressed
-  ,super.key});
+  const _Header({required this.onPressed, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -92,27 +100,15 @@ class _Header extends StatelessWidget {
 
 class _Body extends StatelessWidget {
   final List<int> numbers;
-  const _Body({
-    required this.numbers
-    ,super.key});
+  const _Body({required this.numbers, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: numbers.map((e) => e.toString().split(''))
-            .map(
-            (e) => Row(
-              children: e.map(
-                      (k) => Image.asset(
-                        'asset/img/${k}.png',
-                        width: 70.0,
-                        height: 80.0,
-                      )
-              ).toList(),
-            )
-        ).toList(),
+        children: numbers
+            .map((e) => NumberToImage(number: e)).toList(),
       ),
     );
   }
@@ -120,9 +116,7 @@ class _Body extends StatelessWidget {
 
 class _Footer extends StatelessWidget {
   final VoidCallback onPressed;
-  const _Footer({
-    required this.onPressed,
-    super.key});
+  const _Footer({required this.onPressed, super.key});
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
